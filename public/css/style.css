@@ -135,7 +135,7 @@ body {
 .reels-container { display: flex; gap: 8px; }
 .reel-column {
   display: flex; flex-direction: column; gap: 8px;
-  width: 120px;
+  width: 160px;
 }
 .reel-column.spinning .reel-cell {
   animation: reelSpin 0.08s linear infinite; opacity: 0.4;
@@ -146,12 +146,12 @@ body {
 }
 
 .reel-cell {
-  width: 120px; height: 100px;
+  width: 160px; height: 130px;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(180deg, #1e1040, #150b30);
   border: 1px solid rgba(255,255,255,.06);
-  border-radius: 12px;
-  font-size: 56px;
+  border-radius: 14px;
+  font-size: 72px;
   transition: all 0.2s;
 }
 .reel-cell.landing { animation: cellDrop 0.3s ease-out; }
