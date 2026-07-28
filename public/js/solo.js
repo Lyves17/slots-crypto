@@ -1,6 +1,6 @@
 // ============================================
 // SLOTS SOLO - Game Loop + UI Controller
-// Fits in viewport, no scroll
+// Free Play (virtual balance) + Real Play (MATIC wallet)
 // ============================================
 
 const SlotsSolo = {
@@ -10,8 +10,8 @@ const SlotsSolo = {
   numLines: 20,
   state: 'idle',
   autoSpin: false,
-  autoSpinCount: 0,
   freeSpins: 0,
+  mode: 'free', // 'free' or 'real'
   els: {},
 
   init() {
@@ -46,6 +46,10 @@ const SlotsSolo = {
       paytableBtn: document.getElementById('btn-paytable'),
       paytable: document.getElementById('paytable'),
       paytableClose: document.getElementById('paytable-close'),
+      modeIndicator: document.getElementById('mode-indicator'),
+      modeText: document.getElementById('mode-text'),
+      modeFree: document.getElementById('mode-free'),
+      modeReal: document.getElementById('mode-real'),
     };
   },
 
@@ -59,8 +63,12 @@ const SlotsSolo = {
     this.els.btnAuto.addEventListener('click', () => this.toggleAuto());
     this.els.btnStop.addEventListener('click', () => this.stopAuto());
     this.els.btnNewRound.addEventListener('click', () => this.closeResult());
-    if (this.els.paytableBtn) this.els.paytableBtn.addEventListener('click', () => this.els.paytable.classList.toggle('hidden'));
+    if (this.els.paytableBtn) this.els.paytableBtn.addEventListener('click', () => this.els.paytable.classList.remove('hidden'));
     if (this.els.paytableClose) this.els.paytableClose.addEventListener('click', () => this.els.paytable.classList.add('hidden'));
+
+    // Mode switcher
+    this.els.modeFree.addEventListener('click', () => this.setMode('free'));
+    this.els.modeReal.addEventListener('click', () => this.setMode('real'));
 
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && this.state === 'idle') {
@@ -68,6 +76,38 @@ const SlotsSolo = {
         this.spin();
       }
     });
+  },
+
+  setMode(mode) {
+    this.mode = mode;
+    this.els.modeFree.classList.toggle('active', mode === 'free');
+    this.els.modeReal.classList.toggle('active', mode === 'real');
+
+    if (mode === 'free') {
+      this.balance = 5000;
+      this.els.modeIndicator.className = 'mode-indicator free-play';
+      this.els.modeText.textContent = 'FREE PLAY — Balance virtuelle';
+      document.getElementById('wallet-status').classList.add('hidden');
+      document.getElementById('wallet-info').classList.add('hidden');
+    } else {
+      // Real play: check wallet
+      if (!WalletManager.isConnected()) {
+        document.getElementById('wallet-modal').classList.remove('hidden');
+        this.els.modeFree.classList.add('active');
+        this.els.modeReal.classList.remove('active');
+        return;
+      }
+      this.syncBalance();
+      this.els.modeIndicator.className = 'mode-indicator real-play';
+      this.els.modeText.textContent = 'REAL PLAY — MATIC';
+    }
+    this.updateDisplay();
+  },
+
+  syncBalance() {
+    if (this.mode === 'real' && WalletManager.isConnected()) {
+      this.balance = WalletManager.getBalance();
+    }
   },
 
   adjustBet(delta) {
@@ -110,7 +150,8 @@ const SlotsSolo = {
   },
 
   updateDisplay() {
-    this.els.balanceEl.textContent = this.balance;
+    const balText = this.mode === 'real' ? `${this.balance.toFixed(2)}` : this.balance;
+    this.els.balanceEl.textContent = balText;
     this.els.betPerLineEl.textContent = this.betPerLine;
     this.els.numLinesEl.textContent = this.numLines;
     this.els.betTotalEl.textContent = this.betPerLine * this.numLines;
@@ -124,98 +165,102 @@ const SlotsSolo = {
     } else {
       this.els.freeSpinBadge.classList.add('hidden');
     }
-  },
 
-  buildReelColumns(grid) {
-    const container = this.els.reelsContainer;
-    container.innerHTML = '';
-
-    for (let col = 0; col < 5; col++) {
-      const reel = document.createElement('div');
-      reel.className = 'reel-column';
-
-      for (let row = 0; row < 3; row++) {
-        const cell = document.createElement('div');
-        cell.className = 'reel-cell';
-        cell.textContent = grid[col][row].emoji;
-        cell.dataset.symbol = grid[col][row].id;
-        reel.appendChild(cell);
-      }
-
-      container.appendChild(reel);
+    // Update wallet display
+    if (this.mode === 'real' && WalletManager.isConnected()) {
+      const walletBal = document.getElementById('wallet-balance');
+      if (walletBal) walletBal.textContent = `${WalletManager.getBalance().toFixed(2)} MATIC`;
     }
   },
 
   async spin() {
     const totalBet = this.betPerLine * this.numLines;
+    const isFree = this.freeSpins > 0;
 
-    if (this.freeSpins <= 0 && totalBet > this.balance) return;
+    if (!isFree && totalBet > this.balance) return;
     if (this.state !== 'idle') return;
+
+    // Real mode: deduct from wallet first
+    if (this.mode === 'real' && !isFree) {
+      const deducted = WalletManager.deductBalance(totalBet);
+      if (!deducted) return;
+    }
 
     this.state = 'spinning';
     this.els.winEl.textContent = '0';
     this.els.winEl.classList.remove('win-glow');
 
-    if (this.freeSpins > 0) {
+    if (isFree) {
       this.freeSpins--;
-    } else {
+    } else if (this.mode === 'free') {
       this.balance -= totalBet;
     }
     this.updateDisplay();
 
     // Generate result
     this.engine.spinReels();
-    const result = this.engine.evaluate(this.betPerLine, this.freeSpins > 0 ? 20 : this.numLines);
+    const result = this.engine.evaluate(this.betPerLine, isFree ? 20 : this.numLines);
     const grid = result.grid;
 
     // Animate reels
     await this.animateReels(grid);
 
     // Show result
-    this.balance += result.totalWin;
+    if (this.mode === 'free') {
+      this.balance += result.totalWin;
+    } else {
+      WalletManager.addBalance(result.totalWin);
+      this.syncBalance();
+    }
+
     if (result.totalWin > 0) {
-      this.els.winEl.textContent = result.totalWin;
+      const winText = this.mode === 'real' ? result.totalWin.toFixed(4) : result.totalWin;
+      this.els.winEl.textContent = winText;
       this.els.winEl.classList.add('win-glow');
       this.playSound('win');
     }
 
     if (result.freeSpins > 0) {
       this.freeSpins += result.freeSpins;
-      this.showFreeSpins(result.freeSpins);
+      this.playSound('scatter');
     }
 
     this.updateDisplay();
     this.saveSpin(result);
 
-    if (this.freeSpins > 0 && this.freeSpins <= 0 && this.balance <= 0) {
-      this.showResult('FAILLITE !', 'Vous avez tout perdu', false);
+    if (this.balance <= 0 && !isFree) {
+      this.showResult(
+        this.mode === 'real' ? 'SOLDE INSUFFISANT' : 'FAILLITE !',
+        this.mode === 'real' ? 'Rechargez votre wallet' : 'Rafraîchissez la page',
+        false
+      );
+      this.stopAuto();
     } else if (result.totalWin >= totalBet * 10) {
-      this.showResult('GROS WIN !', `+${result.totalWin}`, true);
+      this.showResult('GROS WIN !', this.mode === 'real' ? `+${result.totalWin.toFixed(4)} MATIC` : `+${result.totalWin}`, true);
     }
 
     this.state = 'idle';
 
-    if (this.autoSpin && this.balance >= (this.freeSpins > 0 ? 0 : totalBet)) {
-      await this.sleep(500);
-      this.spin();
-    } else if (this.autoSpin) {
-      this.stopAuto();
+    if (this.autoSpin) {
+      await this.sleep(400);
+      if (this.balance >= (isFree ? 0 : totalBet)) {
+        this.spin();
+      } else {
+        this.stopAuto();
+      }
     }
   },
 
   async animateReels(finalGrid) {
     const container = this.els.reelsContainer;
 
-    // Build spinning columns
     for (let col = 0; col < 5; col++) {
       const reel = container.children[col];
-      if (!reel) continue;
-      reel.classList.add('spinning');
+      if (reel) reel.classList.add('spinning');
     }
 
     await this.sleep(200);
 
-    // Stagger stop each reel
     for (let col = 0; col < 5; col++) {
       const reel = container.children[col];
       if (!reel) continue;
@@ -223,7 +268,6 @@ const SlotsSolo = {
       await this.sleep(300 + col * 250);
       reel.classList.remove('spinning');
 
-      // Set final symbols
       reel.innerHTML = '';
       for (let row = 0; row < 3; row++) {
         const cell = document.createElement('div');
@@ -238,12 +282,6 @@ const SlotsSolo = {
     this.sleep(100).then(() => {
       document.querySelectorAll('.reel-cell.landing').forEach(c => c.classList.remove('landing'));
     });
-  },
-
-  showFreeSpins(count) {
-    this.els.freeSpinBadge.classList.remove('hidden');
-    this.els.freeSpinCount.textContent = this.freeSpins;
-    this.playSound('scatter');
   },
 
   showResult(text, amount, isWin) {
@@ -272,6 +310,8 @@ const SlotsSolo = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          mode: this.mode,
+          walletAddress: this.mode === 'real' ? (WalletManager.address || '') : '',
           bet: this.betPerLine * this.numLines,
           lines: this.numLines,
           reels: result.grid.map(col => col.map(s => s.id)),
