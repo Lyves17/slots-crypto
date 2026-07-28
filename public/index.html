@@ -17,7 +17,11 @@
       <span class="brand">SLOTS</span>
     </div>
     <div class="top-center">
-      <div id="free-spin-badge" class="free-spin-badge hidden">
+      <div class="mode-switcher">
+        <button id="mode-free" class="mode-btn active">Free Play</button>
+        <button id="mode-real" class="mode-btn">Real Play</button>
+      </div>
+      <div id="free-spin-badge" class="free-spin-badge hidden" style="margin-left:12px;">
         <span class="fs-icon">🎰</span> <span id="free-spin-count">0</span> Free Spins
       </div>
     </div>
@@ -27,7 +31,7 @@
       </div>
       <div id="wallet-info" class="wallet-info hidden">
         <span class="wallet-addr" id="wallet-address"></span>
-        <span class="wallet-bal" id="wallet-balance">0</span>
+        <span class="wallet-bal" id="wallet-balance">0 MATIC</span>
         <button id="disconnect-wallet" class="icon-btn-sm"><i class="fas fa-times"></i></button>
       </div>
     </div>
@@ -35,6 +39,12 @@
 
   <!-- SLOT MACHINE -->
   <div class="machine">
+
+    <!-- Mode Indicator -->
+    <div id="mode-indicator" class="mode-indicator free-play">
+      <span class="mode-dot"></span>
+      <span id="mode-text">FREE PLAY — Balance virtuelle</span>
+    </div>
 
     <!-- Win Display -->
     <div class="win-display">
@@ -71,7 +81,6 @@
           <div class="reel-cell">🍒</div>
         </div>
       </div>
-      <!-- Paylines overlay (decorative) -->
       <div class="payline-indicator left"></div>
       <div class="payline-indicator right"></div>
     </div>
@@ -110,7 +119,7 @@
       <button id="btn-spin" class="spin-btn"><i class="fas fa-play"></i></button>
       <button id="btn-auto" class="ctrl-btn">AUTO</button>
       <button id="btn-stop" class="ctrl-btn stop-btn hidden">STOP</button>
-      <button id="btn-paytable" class="ctrl-btn"><i class="fas fa-table"></i></button>
+      <button id="btn-paytable" class="ctrl-btn"><i class="fas fa-table"></i> PAY</button>
     </div>
   </div>
 
@@ -128,18 +137,24 @@
     <div class="paytable-box">
       <div class="paytable-header">
         <h3>PAYTABLE</h3>
-        <button id="paytable-close" class="icon-btn-sm"><i class="fas fa-times"></i></button>
+        <button id="paytable-close" class="icon-btn-sm"><i class="fas fa-times" style="font-size:18px;"></i></button>
       </div>
       <div class="paytable-grid">
+        <div class="pt-row"><span>⭐⭐⭐⭐⭐</span><span class="gold">x1000</span></div>
+        <div class="pt-row"><span>⭐⭐⭐⭐</span><span class="gold">x250</span></div>
+        <div class="pt-row"><span>⭐⭐⭐</span><span class="gold">x100</span></div>
         <div class="pt-row"><span>💎💎💎💎💎</span><span class="gold">x500</span></div>
         <div class="pt-row"><span>💎💎💎💎</span><span class="gold">x150</span></div>
         <div class="pt-row"><span>💎💎💎</span><span class="gold">x50</span></div>
         <div class="pt-row"><span>7️⃣7️⃣7️⃣7️⃣7️⃣</span><span class="gold">x200</span></div>
         <div class="pt-row"><span>7️⃣7️⃣7️⃣</span><span class="gold">x25</span></div>
-        <div class="pt-row"><span>⭐ WILD</span><span class="gold">Substitue</span></div>
+        <div class="pt-row"><span>BARS BARS BARS</span><span class="gold">x15 / x50 / x100</span></div>
+        <div class="pt-row"><span>🔔🔔🔔</span><span class="gold">x10</span></div>
+        <div class="pt-row"><span>🍉🍇🍊🍋🍒</span><span class="gold">x2 — x8</span></div>
+        <div class="pt-row"><span>⭐ WILD</span><span class="gold">Remplace tout</span></div>
         <div class="pt-row"><span>🎰🎰🎰</span><span class="gold">10 Free Spins</span></div>
         <div class="pt-row"><span>🎰🎰🎰🎰</span><span class="gold">15 Free Spins</span></div>
-        <div class="pt-row"><span>🎰🎰🎰🎰🎰</span><span class="gold">25 Free Spins</span></div>
+        <div class="pt-row"><span>🎰🎰🎰🎰🎰</span><span class="gold">25 Free Spins + x100</span></div>
       </div>
       <div class="paytable-footer">20 Paylines — Symboles de gauche à droite</div>
     </div>
@@ -150,7 +165,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <h3>WALLET</h3>
-        <button id="modal-close" class="icon-btn-sm"><i class="fas fa-times"></i></button>
+        <button id="modal-close" class="icon-btn-sm"><i class="fas fa-times" style="font-size:18px;"></i></button>
       </div>
       <div class="modal-body">
         <button id="modal-metamask" class="modal-btn metamask-btn">
@@ -170,6 +185,7 @@
           <p class="mnemonic-warning">Sauvegardez ces 12 mots !</p>
           <div class="mnemonic-phrase"></div>
           <p class="mnemonic-addr">Adresse: <span id="mnemonic-address"></span></p>
+          <button class="btn-confirm-mnemonic" style="margin-top:12px;" onclick="document.getElementById('wallet-modal').classList.add('hidden')">Fermer</button>
         </div>
       </div>
     </div>
