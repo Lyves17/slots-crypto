@@ -162,7 +162,8 @@ const WalletManager = {
       walletStatus.classList.add('hidden');
       walletInfo.classList.remove('hidden');
       walletAddress.textContent = this.getShortAddress();
-      if (balanceEl) balanceEl.textContent = this.getBalance();
+      const bal = this.getBalance();
+      if (balanceEl) balanceEl.textContent = this.isBuiltIn ? `${bal}` : `${bal} MATIC`;
     } else {
       walletStatus.classList.remove('hidden');
       walletInfo.classList.add('hidden');
@@ -171,8 +172,17 @@ const WalletManager = {
 };
 
 // ---- Modal Handlers ----
+function switchToRealPlay() {
+  modal.classList.add('hidden');
+  if (typeof SlotsSolo !== 'undefined' && SlotsSolo.setMode) {
+    SlotsSolo.setMode('real');
+  }
+}
+
+let modal;
+
 function initWalletModal() {
-  const modal = document.getElementById('wallet-modal');
+  modal = document.getElementById('wallet-modal');
   const closeBtn = document.getElementById('modal-close');
   const createBtn = document.getElementById('modal-create');
   const restoreBtn = document.getElementById('modal-restore');
@@ -189,6 +199,11 @@ function initWalletModal() {
     mnemonicDisplay.classList.remove('hidden');
     mnemonicDisplay.querySelector('.mnemonic-phrase').textContent = result.mnemonic;
     mnemonicAddr.textContent = result.address;
+    // Auto switch after showing mnemonic
+    const closeMnemonicBtn = mnemonicDisplay.querySelector('.btn-confirm-mnemonic');
+    if (closeMnemonicBtn) {
+      closeMnemonicBtn.onclick = () => switchToRealPlay();
+    }
   });
 
   if (restoreBtn) restoreBtn.addEventListener('click', () => {
@@ -201,7 +216,7 @@ function initWalletModal() {
       const phrase = mnemonicInput.querySelector('input').value.trim();
       if (phrase.split(' ').length === 12) {
         WalletManager.restoreFromMnemonic(phrase);
-        modal.classList.add('hidden');
+        switchToRealPlay();
       }
     });
   }
@@ -209,7 +224,7 @@ function initWalletModal() {
   if (mmBtn) mmBtn.addEventListener('click', async () => {
     try {
       await WalletManager.connectMetaMask();
-      modal.classList.add('hidden');
+      switchToRealPlay();
     } catch (e) { alert(e.message); }
   });
 }
