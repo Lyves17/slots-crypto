@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Slots Crypto</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-left">
+      <button id="btn-menu" class="icon-btn"><i class="fas fa-bars"></i></button>
+      <span class="brand">SLOTS</span>
+    </div>
+    <div class="top-center">
+      <div id="free-spin-badge" class="free-spin-badge hidden">
+        <span class="fs-icon">🎰</span> <span id="free-spin-count">0</span> Free Spins
+      </div>
+    </div>
+    <div class="top-right">
+      <div id="wallet-status" class="wallet-status">
+        <button id="connect-wallet-btn" class="wallet-btn-small"><i class="fas fa-wallet"></i> Wallet</button>
+      </div>
+      <div id="wallet-info" class="wallet-info hidden">
+        <span class="wallet-addr" id="wallet-address"></span>
+        <span class="wallet-bal" id="wallet-balance">0</span>
+        <button id="disconnect-wallet" class="icon-btn-sm"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLOT MACHINE -->
+  <div class="machine">
+
+    <!-- Win Display -->
+    <div class="win-display">
+      <div class="win-label">WIN</div>
+      <div id="win-amount" class="win-amount">0</div>
+    </div>
+
+    <!-- Reels -->
+    <div class="reels-frame">
+      <div id="reels-container" class="reels-container">
+        <div class="reel-column">
+          <div class="reel-cell">🍒</div>
+          <div class="reel-cell">💎</div>
+          <div class="reel-cell">🍋</div>
+        </div>
+        <div class="reel-column">
+          <div class="reel-cell">7️⃣</div>
+          <div class="reel-cell">🍒</div>
+          <div class="reel-cell">🔔</div>
+        </div>
+        <div class="reel-column">
+          <div class="reel-cell">🍇</div>
+          <div class="reel-cell">🍊</div>
+          <div class="reel-cell">🍉</div>
+        </div>
+        <div class="reel-column">
+          <div class="reel-cell">🍒</div>
+          <div class="reel-cell">⭐</div>
+          <div class="reel-cell">🍋</div>
+        </div>
+        <div class="reel-column">
+          <div class="reel-cell">🔔</div>
+          <div class="reel-cell">🍊</div>
+          <div class="reel-cell">🍒</div>
+        </div>
+      </div>
+      <!-- Paylines overlay (decorative) -->
+      <div class="payline-indicator left"></div>
+      <div class="payline-indicator right"></div>
+    </div>
+
+    <!-- Info Row -->
+    <div class="info-row">
+      <div class="info-box">
+        <div class="info-label">BALANCE</div>
+        <div id="balance" class="info-val gold">5000</div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">BET/LINE</div>
+        <div class="bet-controls-inline">
+          <button id="btn-minus" class="bet-btn-sm">-</button>
+          <span id="bet-per-line" class="info-val">10</span>
+          <button id="btn-plus" class="bet-btn-sm">+</button>
+        </div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">LINES</div>
+        <div class="bet-controls-inline">
+          <button id="btn-lines-minus" class="bet-btn-sm">-</button>
+          <span id="num-lines" class="info-val">20</span>
+          <button id="btn-lines-plus" class="bet-btn-sm">+</button>
+        </div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">TOTAL BET</div>
+        <div id="bet-total" class="info-val gold">200</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <button id="btn-max-bet" class="ctrl-btn">MAX</button>
+      <button id="btn-spin" class="spin-btn"><i class="fas fa-play"></i></button>
+      <button id="btn-auto" class="ctrl-btn">AUTO</button>
+      <button id="btn-stop" class="ctrl-btn stop-btn hidden">STOP</button>
+      <button id="btn-paytable" class="ctrl-btn"><i class="fas fa-table"></i></button>
+    </div>
+  </div>
+
+  <!-- RESULT OVERLAY -->
+  <div id="result-overlay" class="result-overlay hidden">
+    <div class="result-box">
+      <div id="result-text" class="result-text"></div>
+      <div id="result-amount" class="result-amount"></div>
+      <button id="btn-new-round" class="btn-new-round">OK</button>
+    </div>
+  </div>
+
+  <!-- PAYTABLE OVERLAY -->
+  <div id="paytable" class="paytable hidden">
+    <div class="paytable-box">
+      <div class="paytable-header">
+        <h3>PAYTABLE</h3>
+        <button id="paytable-close" class="icon-btn-sm"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="paytable-grid">
+        <div class="pt-row"><span>💎💎💎💎💎</span><span class="gold">x500</span></div>
+        <div class="pt-row"><span>💎💎💎💎</span><span class="gold">x150</span></div>
+        <div class="pt-row"><span>💎💎💎</span><span class="gold">x50</span></div>
+        <div class="pt-row"><span>7️⃣7️⃣7️⃣7️⃣7️⃣</span><span class="gold">x200</span></div>
+        <div class="pt-row"><span>7️⃣7️⃣7️⃣</span><span class="gold">x25</span></div>
+        <div class="pt-row"><span>⭐ WILD</span><span class="gold">Substitue</span></div>
+        <div class="pt-row"><span>🎰🎰🎰</span><span class="gold">10 Free Spins</span></div>
+        <div class="pt-row"><span>🎰🎰🎰🎰</span><span class="gold">15 Free Spins</span></div>
+        <div class="pt-row"><span>🎰🎰🎰🎰🎰</span><span class="gold">25 Free Spins</span></div>
+      </div>
+      <div class="paytable-footer">20 Paylines — Symboles de gauche à droite</div>
+    </div>
+  </div>
+
+  <!-- WALLET MODAL -->
+  <div id="wallet-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>WALLET</h3>
+        <button id="modal-close" class="icon-btn-sm"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <button id="modal-metamask" class="modal-btn metamask-btn">
+          <i class="fas fa-paw"></i> MetaMask
+        </button>
+        <button id="modal-create" class="modal-btn create-btn">
+          <i class="fas fa-plus-circle"></i> Créer un Wallet
+        </button>
+        <button id="modal-restore" class="modal-btn restore-btn">
+          <i class="fas fa-redo"></i> Restaurer avec Mnemonic
+        </button>
+        <div id="mnemonic-input" class="mnemonic-input hidden">
+          <input type="text" placeholder="Entrez vos 12 mots..." autocomplete="off">
+          <button class="btn-confirm-mnemonic">Confirmer</button>
+        </div>
+        <div id="mnemonic-display" class="mnemonic-display hidden">
+          <p class="mnemonic-warning">Sauvegardez ces 12 mots !</p>
+          <div class="mnemonic-phrase"></div>
+          <p class="mnemonic-addr">Adresse: <span id="mnemonic-address"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <script src="/js/game.js"></script>
+  <script src="/js/wallet.js"></script>
+  <script src="/js/solo.js"></script>
+  <script>
+    window.Sounds = {
+      reelStop: new Howl({ src: ['https://cdn.jsdelivr.net/gh/nicegoodboy/sounds@main/click_default.mp3'], volume: 0.3 }),
+      win: new Howl({ src: ['https://cdn.jsdelivr.net/gh/nicegoodboy/sounds@main/you_win.mp3'] }),
+      scatter: new Howl({ src: ['https://cdn.jsdelivr.net/gh/nicegoodboy/sounds@main/actionClick.mp3'] }),
+      click: new Howl({ src: ['https://cdn.jsdelivr.net/gh/nicegoodboy/sounds@main/click_default.mp3'], volume: 0.2 }),
+    };
+    document.getElementById('connect-wallet-btn').addEventListener('click', () => {
+      document.getElementById('wallet-modal').classList.remove('hidden');
+    });
+    document.getElementById('disconnect-wallet').addEventListener('click', () => {
+      WalletManager.disconnect();
+    });
+  </script>
+</body>
+</html>
